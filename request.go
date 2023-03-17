@@ -61,10 +61,11 @@ func BaseURL(url string) string {
 }
 
 func SendRequest(method RequestMethod, url, body string) ([]byte, error) {
+	var b []byte
 	// create a request
 	req, err := http.NewRequest(method.String(), url, strings.NewReader(body))
 	if err != nil {
-		return nil, err
+		return b, err
 	}
 
 	// NOTE this !! -You need to set Req.Close to true (the defer on resp.Body.Close() syntax used in the examples is not enough)
@@ -75,24 +76,22 @@ func SendRequest(method RequestMethod, url, body string) ([]byte, error) {
 	// send request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return b, err
 	}
 
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
+		// Ignore error explicitly
+		_ = Body.Close()
 	}(resp.Body)
 
 	if resp.StatusCode >= 200 && resp.StatusCode > 300 {
 		err = errors.New(fmt.Sprintf("Non 200 status code: %d", resp.StatusCode))
-		return nil, err
+		return b, err
 	}
 
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return b, err
 	}
 
 	return b, nil
