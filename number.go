@@ -1,4 +1,4 @@
-package tools
+package toolbox
 
 func AllSameNumbers(n []int) bool {
 	for i := 1; i < len(n); i++ {
