@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -13,6 +14,20 @@ func TrimString(s string) (string, error) {
 		return "", err
 	}
 	return reg.ReplaceAllString(s, ""), nil
+}
+
+func HasStrings(str string, ss ...string) (bool, int) {
+	matches := 0
+	isCompleteMatch := true
+
+	for _, sub := range ss {
+		if strings.Contains(str, sub) {
+			matches += 1
+		} else {
+			isCompleteMatch = false
+		}
+	}
+	return isCompleteMatch, matches
 }
 
 func HasString(ss []string, str string) bool {
