@@ -1,7 +1,6 @@
 package toolbox
 
 import (
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -63,9 +62,7 @@ func BaseURL(url string) string {
 
 func SendRequest(method RequestMethod, url, body string) ([]byte, error) {
 	var b []byte
-
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
+	
 	// create a request
 	req, err := http.NewRequest(method.String(), url, strings.NewReader(body))
 	if err != nil {
