@@ -44,6 +44,10 @@ func MakeTempFile(tempFileDir, prefix string) (f string, err error) {
 	return file.Name(), nil
 }
 
+func DeleteFile(filepath string) error {
+	return os.Remove(filepath)
+}
+
 func FileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	if os.IsNotExist(err) {
