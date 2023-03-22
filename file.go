@@ -44,10 +44,12 @@ func MakeTempFile(tempFileDir, prefix string) (f string, err error) {
 	return file.Name(), nil
 }
 
-func FileExists(filename string) {
+func FileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	if os.IsNotExist(err) {
-		panic(fmt.Sprintf("File Not Found: %s\n", filename))
+		return false
+	} else {
+		return true
 	}
 }
 

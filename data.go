@@ -23,3 +23,24 @@ func CountLines(r io.Reader) (int, error) {
 		}
 	}
 }
+
+func Difference(a, b []string) []string {
+	// reorder the input,
+	// so that we can check the longer slice over the shorter one
+	longer, shorter := a, b
+	if len(b) > len(a) {
+		longer, shorter = b, a
+	}
+
+	mb := make(map[string]struct{}, len(shorter))
+	for _, x := range shorter {
+		mb[x] = struct{}{}
+	}
+	var diff []string
+	for _, x := range longer {
+		if _, found := mb[x]; !found {
+			diff = append(diff, x)
+		}
+	}
+	return diff
+}
