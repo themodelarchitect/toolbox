@@ -24,6 +24,14 @@ func CountLines(r io.Reader) (int, error) {
 	}
 }
 
+func CopyMap[K, V comparable](m map[K]V) map[K]V {
+	result := make(map[K]V)
+	for k, v := range m {
+		result[k] = v
+	}
+	return result
+}
+
 func Difference(a, b []string) []string {
 	// reorder the input,
 	// so that we can check the longer slice over the shorter one
