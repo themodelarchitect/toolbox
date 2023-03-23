@@ -132,6 +132,28 @@ func CopyFile(sourcePath, destinationPath string) error {
 	return nil
 }
 
+func ReadFileToBytes(filePath string) ([]byte, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer file.Close()
+
+	// Get the file size
+	stat, err := file.Stat()
+	if err != nil {
+		return []byte{}, err
+	}
+
+	// Read the file into a byte slice
+	bs := make([]byte, stat.Size())
+	_, err = bufio.NewReader(file).Read(bs)
+	if err != nil && err != io.EOF {
+		return []byte{}, err
+	}
+	return bs, nil
+}
+
 func ReadFileToString(filePath string) (string, error) {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
