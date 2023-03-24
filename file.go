@@ -6,6 +6,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,9 +16,10 @@ import (
 )
 
 func TempDir() string {
-	labFolder := "/export/home/ccur"
-	tempFolder := filepath.Join(labFolder, "automation_temp_files")
-	_, err := os.Stat(labFolder)
+	uniqName := uuid.New().String()
+	tmpDirLocation := os.TempDir()
+	tempFolder := filepath.Join(tmpDirLocation, uniqName)
+	_, err := os.Stat(tempFolder)
 	if os.IsNotExist(err) {
 		return "/tmp"
 	} else {
