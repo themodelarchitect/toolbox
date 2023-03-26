@@ -59,13 +59,14 @@ func FileExists(filename string) bool {
 	}
 }
 
-func DownloadFile(filepath string, url string) (err error) {
+// DownloadFile returns the number of bytes written.
+func DownloadFile(filepath string, url string, headers map[string]string) (written int64, err error) {
 	client := http.DefaultClient
 
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer func(out *os.File) {
 		err := out.Close()
@@ -75,11 +76,24 @@ func DownloadFile(filepath string, url string) (err error) {
 	}(out)
 
 	// Get the data
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("User-Agent", "QA_Automation/1.0")
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	// NOTE this !! -You need to set Req.Close to true
+	// (the defer on resp.Body.Close() syntax used in the examples is not enough)
+	req.Close = true
+
+	if headers != nil {
+		for k, v := range headers {
+			req.Header.Add(k, v)
+		}
+	}
+
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -89,16 +103,11 @@ func DownloadFile(filepath string, url string) (err error) {
 
 	// Check server response
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("%s => Non 200 Response Code: %s ", url, resp.Status)
+		return 0, fmt.Errorf("%s => Non 200 Response Code: %s ", url, resp.Status)
 	}
 
 	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return io.Copy(out, resp.Body)
 }
 
 func CopyFile(sourcePath, destinationPath string) error {
