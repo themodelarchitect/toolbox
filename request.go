@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"path"
 	"strings"
@@ -60,9 +61,9 @@ func BaseURL(url string) string {
 	return url
 }
 
-func SendRequest(method RequestMethod, url, body string) ([]byte, error) {
+func SendRequest(method RequestMethod, url, body string, headers map[string]string) ([]byte, error) {
 	var b []byte
-	
+
 	// create a request
 	req, err := http.NewRequest(method.String(), url, strings.NewReader(body))
 	if err != nil {
@@ -72,7 +73,13 @@ func SendRequest(method RequestMethod, url, body string) ([]byte, error) {
 	// NOTE this !! -You need to set Req.Close to true (the defer on resp.Body.Close() syntax used in the examples is not enough)
 	req.Close = true
 
-	req.Header.Set("User-Agent", "QA_Automation/1.0")
+	if headers != nil {
+		for k, v := range headers {
+			req.Header.Add(k, v)
+		}
+	}
+
+	reqDump, _ := httputil.DumpRequestOut(req, true)
 
 	// send request
 	resp, err := http.DefaultClient.Do(req)
@@ -80,13 +87,16 @@ func SendRequest(method RequestMethod, url, body string) ([]byte, error) {
 		return b, err
 	}
 
+	respDump, _ := httputil.DumpResponse(resp, true)
+
 	defer func(Body io.ReadCloser) {
 		// Ignore error explicitly
 		_ = Body.Close()
 	}(resp.Body)
 
 	if resp.StatusCode >= 200 && resp.StatusCode > 300 {
-		err = errors.New(fmt.Sprintf("Non 200 status code: %d", resp.StatusCode))
+		message := fmt.Sprintf("Non 200 status code: %d\nREQUEST:\\n%s\nRESPONSE:\\n%s", resp.StatusCode, string(reqDump), string(respDump))
+		err = errors.New(message)
 		return b, err
 	}
 
@@ -96,13 +106,4 @@ func SendRequest(method RequestMethod, url, body string) ([]byte, error) {
 	}
 
 	return b, nil
-}
-
-func CheckURL(url string) error {
-	_, err := SendRequest(HEAD, url, "")
-	if err != nil {
-		return err
-	} else {
-		return nil
-	}
 }
