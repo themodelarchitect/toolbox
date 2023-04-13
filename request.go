@@ -95,7 +95,7 @@ func SendRequest(method RequestMethod, url, body string, headers map[string]stri
 	}(resp.Body)
 
 	if resp.StatusCode >= 200 && resp.StatusCode > 300 {
-		message := fmt.Sprintf("Non 200 status code: %d\nREQUEST: %s\nRESPONSE: %s\n", resp.StatusCode, string(reqDump), string(respDump))
+		message := fmt.Sprintf("Non 200 status code: %d\nREQUEST:\\n%s\nRESPONSE:\\n%s", resp.StatusCode, string(reqDump), string(respDump))
 		err = errors.New(message)
 		return b, err
 	}
