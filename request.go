@@ -1,12 +1,9 @@
 package toolbox
 
 import (
-	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"path"
 	"strings"
@@ -79,30 +76,18 @@ func SendRequest(method RequestMethod, url, body string, headers map[string]stri
 		}
 	}
 
-	reqDump, _ := httputil.DumpRequestOut(req, true)
-
 	// send request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return b, err
 	}
 
-	respDump, _ := httputil.DumpResponse(resp, true)
-
 	defer func(Body io.ReadCloser) {
 		// Ignore error explicitly
 		_ = Body.Close()
 	}(resp.Body)
 
-	if resp.StatusCode >= 200 && resp.StatusCode > 300 {
-		reqStr := strings.TrimSpace(string(reqDump))
-		respStr := strings.TrimSpace(string(respDump))
-		message := fmt.Sprintf("Non 200 status code: %d REQUEST: %s RESPONSE: %s", resp.StatusCode, reqStr, respStr)
-		err = errors.New(message)
-		return b, err
-	}
-
-	b, err = ioutil.ReadAll(resp.Body)
+	b, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return b, err
 	}
