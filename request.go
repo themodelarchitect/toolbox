@@ -58,13 +58,14 @@ func BaseURL(url string) string {
 	return url
 }
 
-func SendRequest(method RequestMethod, url, body string, headers map[string]string) ([]byte, error) {
+func SendRequest(method RequestMethod, url, body string, headers map[string]string) (int, []byte, error) {
+	var statusCode int
 	var b []byte
 
 	// create a request
 	req, err := http.NewRequest(method.String(), url, strings.NewReader(body))
 	if err != nil {
-		return b, err
+		return statusCode, b, err
 	}
 
 	// NOTE this !! -You need to set Req.Close to true (the defer on resp.Body.Close() syntax used in the examples is not enough)
@@ -79,7 +80,7 @@ func SendRequest(method RequestMethod, url, body string, headers map[string]stri
 	// send request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return b, err
+		return resp.StatusCode, b, err
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -89,8 +90,8 @@ func SendRequest(method RequestMethod, url, body string, headers map[string]stri
 
 	b, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return b, err
+		return resp.StatusCode, b, err
 	}
 
-	return b, nil
+	return resp.StatusCode, b, nil
 }
