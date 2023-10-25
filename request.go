@@ -3,6 +3,7 @@ package toolbox
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -80,7 +81,8 @@ func SendRequest(method RequestMethod, url, body string, headers map[string]stri
 	// send request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return resp.StatusCode, b, err
+		log.Println(err)
+		return statusCode, b, err
 	}
 
 	defer func(Body io.ReadCloser) {
